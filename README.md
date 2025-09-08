@@ -45,7 +45,7 @@
 
 
 
-![nf-core/genomicvista pipeline overview](images/nf-core-rnaseq_metro_map_grey_animated.svg)
+![nf-core/genomicvista pipeline overview](images/genomicVistaWorkflow.png)
 <!-- TODO nf-core: Fill in short bullet-pointed list of the default steps in the pipeline -->
 
 The pipeline performs the following major steps:
