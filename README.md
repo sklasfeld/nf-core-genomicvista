@@ -30,15 +30,16 @@
 
 **nf-core/genomicvista** is a bioinformatics pipeline that processes raw GTEx expression data into a structured analytical object for demographic-stratified target discovery through integration of metadata (sex and age). It takes a samplesheet as input with urls or files paths to the following:
 
-* GTEx expression data (TPM values)
+
+* Annotation GTF: Gene annotation file (GTF format)
+
+* Expression Matrix: GTEx expression data (TPM values)
 
 * Sample attributes 
 
-  - subject information
+  - tissue attributes
 
-  - tissue information
-
-* Gene annotation file (GTF format)
+  - subject attributes
 
 <!-- TODO nf-core: Include a figure that guides the user through the major workflow steps. Many nf-core
      workflows use the "tube map" design for that. See https://nf-co.re/docs/guidelines/graphic_design/workflow_diagrams#examples for examples.   -->
@@ -54,7 +55,7 @@ The pipeline performs the following major steps:
 
 2. Imports and organizes the data into a single `anndata` object
 
-3. Exports the `anndata` object as an `.h5ad` file 
+3. Exports the `anndata` object as an `.zarr` file 
 
 The output can be used for downstream demographic-stratified target discovery analyses.
 
