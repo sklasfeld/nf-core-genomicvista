@@ -73,7 +73,15 @@ workflow {
         params.expression_matrix,
         params.tissue_attributes,
         params.subject_attributes,
-        params.annotation_gtf
+        params.annotation_gtf,
+        params.chunk_size,
+        params.skip_expression_rows,
+        params.expression_meta_cols,
+        params.filter_tissue,
+        params.filter_gene,
+        params.filter_transcript,
+        params.filter_sex,
+        params.filter_age
     )
 
     //
@@ -83,7 +91,8 @@ workflow {
         PIPELINE_INITIALISATION.out.expression_data,
         PIPELINE_INITIALISATION.out.tissue_attributes,
         PIPELINE_INITIALISATION.out.subject_attributes,
-        PIPELINE_INITIALISATION.out.annotation_gtf
+        PIPELINE_INITIALISATION.out.annotation_gtf,
+        PIPELINE_INITIALISATION.out.optional_parameters
     )
     //
     // SUBWORKFLOW: Run completion tasks
