@@ -25,6 +25,7 @@ workflow GENOMICVISTA {
     ch_tissue_attributes   // channel: [ path(tissue_attributes) ]
     ch_subject_attributes  // channel: [ path(subject_attributes) ]
     ch_annotation_gtf     // channel: [ path(annotation_gtf) ]
+    ch_optional_parameters // channel: optional parameters for data preprocessing
 
     main:
 
@@ -38,7 +39,8 @@ workflow GENOMICVISTA {
         ch_expression_matrix,
         ch_tissue_attributes,
         ch_subject_attributes,
-        ch_annotation_gtf
+        ch_annotation_gtf,
+        ch_optional_parameters
     )
     ch_versions = ch_versions.mix(DATA_PREPROCESSING.out.versions.first())
 

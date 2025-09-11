@@ -12,6 +12,8 @@ process DATA_PREPROCESSING {
     path tissue_attributes
     path subject_attributes
     path annotation_gtf
+    val optional_parameters
+
 
     output:
     path "processed_data.h5"        , emit: processed_data
@@ -29,7 +31,8 @@ process DATA_PREPROCESSING {
         --tissue-attributes ${tissue_attributes} \\
         --subject-attributes ${subject_attributes} \\
         --annotation-gtf ${annotation_gtf} \\
-        --output processed_data.h5 \\
+        ${optional_parameters} \\
+        --output processed_data.zarr \\
         --stats-output preprocessing_stats.json \\
         ${args}
 
@@ -43,7 +46,7 @@ process DATA_PREPROCESSING {
 
     stub:
     """
-    touch processed_data.h5
+    touch processed_data.zarr
     touch preprocessing_summary.txt
     
     cat <<-END_VERSIONS > versions.yml

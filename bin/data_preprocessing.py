@@ -48,12 +48,12 @@ def parse_args():
     parser.add_argument('--annotation-gtf', required=True, help='Path to annotation GTF file')
     parser.add_argument('--output', required=True, help='Output processed data file')
     parser.add_argument('--stats-output', required=True, help='Output statistics file')
-    parser.add_argument('--chunkSize', required=False, help='Chunk size for processing `expression-matrix`', default=1000, type=int)
+    parser.add_argument('--chunk_size', required=False, help='Chunk size for processing `expression-matrix`', default=1000, type=int)
     parser.add_argument('--skip_expression_rows', required=False, help='If the `expression-matrix` has metadata above the header, set this to the number of lines of meta data to skip at start of `expression-matrix`. Default is 2.', default=2, type=int)
     parser.add_argument('--expression_meta_cols', required=False, nargs='*', default=2, help='Number of columns in the `expression-matrix` file with feature information such as gene or transcript name. Default is 2 (Name & Description).', default=2, type=int)
     return parser.parse_args()
 
-def load_data(expression_file, tissue_file, subject_file, annotation_gtf, chunkSize=1000, skip_expression_rows=2, expression_meta_cols=2):
+def load_data(expression_file, tissue_file, subject_file, annotation_gtf, chunk_size=1000, skip_expression_rows=2, expression_meta_cols=2):
     
     """Load all input data files"""
 
@@ -61,12 +61,12 @@ def load_data(expression_file, tissue_file, subject_file, annotation_gtf, chunkS
     # get the matrix dimensions
     nrows = count_lines(expression_file) - skip_expression_rows
     ncols = count_columns(expression_file, skiprows=skip_expression_rows)
-    total_iterations = np.ceil(nrows / chunkSize)
+    total_iterations = np.ceil(nrows / chunk_size)
 
     # first get the gene/transcript meta data from the expression data file
     if expression_meta_cols > 1:
         genes_meta_df = pd.concat(
-            [chunk for chunk in tqdm(pd.read_csv(expression_file, sep="\t", skiprows=skip_expression_rows, usecols=list(range(0,expression_meta_cols)), compression='gzip', chunksize=chunkSize), desc='Loading gene data', total=total_iterations)]
+            [chunk for chunk in tqdm(pd.read_csv(expression_file, sep="\t", skiprows=skip_expression_rows, usecols=list(range(0,expression_meta_cols)), compression='gzip', chunk_size=chunk_size), desc='Loading gene data', total=total_iterations)]
         )
         genes_meta_df.set_index(genes_meta_df.columns[0], inplace=True)
     else:
@@ -75,7 +75,7 @@ def load_data(expression_file, tissue_file, subject_file, annotation_gtf, chunkS
     
     # Then get the TPMs from the expression data file
     expression_data = pd.concat(
-        [chunk for chunk in tqdm(pd.read_csv(expression_file, sep="\t", skiprows=skip_expression_rows, usecols=range(expression_meta_cols,expression_meta_cols+ncols), compression='gzip', dtype=np.float64, chunksize=chunkSize), desc='Loading expression data', total=total_iterations)]
+        [chunk for chunk in tqdm(pd.read_csv(expression_file, sep="\t", skiprows=skip_expression_rows, usecols=range(expression_meta_cols,expression_meta_cols+ncols), compression='gzip', dtype=np.float64, chunk_size=chunk_size), desc='Loading expression data', total=total_iterations)]
     )
 
     print(f"Loading gene annotations from {annotation_gtf}")
@@ -102,9 +102,9 @@ def load_data(expression_file, tissue_file, subject_file, annotation_gtf, chunkS
     print(f"Loading tissue attributes from {tissue_file}")
 
     nrows = count_lines(tissue_file)
-    total_iterations = np.ceil(nrows / chunkSize)
+    total_iterations = np.ceil(nrows / chunk_size)
     tissue_attrs = pd.concat(
-        [chunk for chunk in tqdm(pd.read_csv(tissue_file, sep="\t", chunksize=chunkSize), desc='Loading subject data', total=total_iterations)]
+        [chunk for chunk in tqdm(pd.read_csv(tissue_file, sep="\t", chunk_size=chunk_size), desc='Loading subject data', total=total_iterations)]
     )
     # FOR NOW, WE WILL ONLY KEEP INFORMATION ABOUT THE TISSUES SAMPLED (in the future we can include more columns if needed)
     tissue_attrs = tissue_attrs.loc[tissue_attrs["SMAFRZE"]=="RNASEQ",["SAMPID", "SMTS", "SMTSD"]].copy()
@@ -179,7 +179,7 @@ def main():
         args.tissue_attributes, 
         args.subject_attributes,
         args.annotation_gtf,
-        chunkSize=args.chunkSize,
+        chunk_size=args.chunk_size,
         skip_expression_rows=args.skip_expression_rows,
         expression_meta_cols=args.expression_meta_cols
     )

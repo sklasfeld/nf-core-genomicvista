@@ -35,6 +35,14 @@ workflow PIPELINE_INITIALISATION {
     tissue_attributes //  string: Path to table of tissue attributes
     subject_attributes //  string: Path to table of subject attributes
     annotation_gtf //  string: Path to gene annotation GTF file
+    chunk_size //  int: Number of lines to process per chunk of expression matrix (optional)
+    skip_expression_rows // Lines to skip at start of expression matrix (optional)
+    expression_meta_cols // Number of metadata columns in expression matrix (optional)
+    filter_tissue //  string: Tissue type to filter samples by (optional)
+    filter_gene //  string: Gene to filter expression data by (optional)
+    filter_transcript //  string: Transcript to filter expression data by (optional)
+    filter_sex //  string (optional)
+    filter_age //  string: Age range to filter samples by (optional)
 
     main:
 
@@ -71,26 +79,51 @@ workflow PIPELINE_INITIALISATION {
     //
 
     Channel
-        .fromPath(params.expression_matrix)
-            .set { ch_expression_data }
+        .fromPath(expression_matrix)
+            .set { ch_expression_matrix }
 
     Channel
-        .fromPath(params.tissue_attributes)
+        .fromPath(tissue_attributes)
             .set { ch_tissue_attributes }
 
     Channel
-        .fromPath(params.subject_attributes)
+        .fromPath(subject_attributes)
             .set { ch_subject_attributes }
 
     Channel
-        .fromPath(params.annotation_gtf)
+        .fromPath(annotation_gtf)
         .   set { ch_annotation_gtf }
 
+    // Define optional flags 
+    def chunk_size_flag = chunk_size ? "--chunk_size ${chunk_size}" : "--chunk_size 1000"
+    def skip_expression_rows_flag = skip_expression_rows ? "--skip_expression_rows ${skip_expression_rows}" : "--skip_expression_rows 2"
+    def expression_meta_cols_flag = expression_meta_cols ? "--expression_meta_cols ${expression_meta_cols}" : "--expression_meta_cols 2"
+    def filter_tissue_flag = filter_tissue ? "--filter_tissue '${filter_tissue}'" : ""
+    def filter_gene_flag = filter_gene ? "--filter_gene '${filter_gene}'" : ""
+    def filter_transcript_flag = filter_transcript ? "--filter_transcript '${filter_transcript}'" : ""
+    def filter_sex_flag = filter_sex ? "--filter_sex '${filter_sex}'" : ""
+    def filter_age_flag = filter_age ? "--filter_age '${filter_age}'" : ""
+
+    // Combine all optional flags into a single string
+    def opt_params_str = [
+        chunk_size_flag,
+        skip_expression_rows_flag,
+        expression_meta_cols_flag,
+        filter_tissue_flag,
+        filter_gene_flag,
+        filter_transcript_flag,
+        filter_sex_flag,
+        filter_age_flag].findAll { it }.join(' ')
+    
+    // Create a value channel from the string
+    ch_optional_parameters = Channel.value(opt_params_str)
+    
     emit:
-        expression_data     = ch_expression_data
+        expression_matrix     = ch_expression_matrix
         tissue_attributes   = ch_tissue_attributes
         subject_attributes   = ch_subject_attributes
         annotation_gtf      = ch_annotation_gtf
+        optional_parameters = ch_optional_parameters
     }
 
 /*
